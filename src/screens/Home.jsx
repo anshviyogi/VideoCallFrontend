@@ -15,7 +15,11 @@ function Home() {
 
   const formSubmitHandler = useCallback((e)=> {
     e.preventDefault()
-    socket.emit("room:join", { email, room });
+    try {
+        socket.emit("room:join", { email, room });
+    } catch (error) {
+        console.log("Error >>> ",error)
+    }
   },[email,room])
 
   const handleJoinRoom = useCallback(
@@ -27,7 +31,11 @@ function Home() {
   );
 
   useEffect(() => {
-    socket.on("room:join", handleJoinRoom);
+    try {
+        socket.on("room:join", handleJoinRoom);        
+    } catch (error) {
+        console.log("Error >>>",error)
+    }
     return () => {
       socket.off("room:join", handleJoinRoom);
     };
