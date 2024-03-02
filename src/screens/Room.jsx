@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from "react";
+import React, { useEffect, useCallback, useState, useRef } from "react";
 import ReactPlayer from "react-player";
 import peer from "../service/peer";
 import { useSocket } from "../context/SocketProvider";
@@ -8,6 +8,10 @@ const RoomPage = () => {
   const [remoteSocketId, setRemoteSocketId] = useState(null);
   const [myStream, setMyStream] = useState();
   const [remoteStream, setRemoteStream] = useState();
+  const [clientAudio, setClientAudio] = useState(true)
+  const [userAudio, setUserAudio] = useState(true)
+
+  const userAud = useRef(false)
 
   const handleUserJoined = useCallback(({ email, id }) => {
     console.log(`Email ${email} joined room`);
@@ -109,6 +113,8 @@ const RoomPage = () => {
     handleNegoNeedFinal,
   ]);
 
+  console.log(clientAudio, userAudio)
+
   return (
     <div className="bg-black text-white h-full">
       <h1 className="text-center text-7xl">Room Page</h1>
@@ -125,12 +131,14 @@ const RoomPage = () => {
         <>
           <h1>My Stream</h1>
           <ReactPlayer
-          style={{border:"1px solid green"}}
+            style={{border:"1px solid green"}}
             playing
             height="500px"
             width="500px"
             url={myStream}
+            muted={userAudio}
           />
+          <button onClick={()=> setUserAudio(!userAudio)}>{userAudio ? "Unmute" : "Mute"}</button>
         </>
       )}
       </div>
@@ -139,13 +147,16 @@ const RoomPage = () => {
       {remoteStream && (
         <>
           <h1>Remote Stream</h1>
+          {console.log('Inside here ')}
           <ReactPlayer
-          style={{border:"1px solid green"}}
+            style={{border:"1px solid green"}}
             playing
             height="500px"
             width="500px"
             url={remoteStream}
+            muted={clientAudio}
           />
+          <button onClick={()=> setClientAudio(!clientAudio)}>{clientAudio ? "Unmute" : "Mute"}</button>
         </>
       )}
       </div>
