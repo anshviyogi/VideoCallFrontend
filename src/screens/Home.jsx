@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useSocket } from "../context/SocketProvider";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { setDetails } from "../app/userSlice";
 
 function Home() {
   var currentTime = new Date();
@@ -12,6 +14,7 @@ function Home() {
   const [room, setRoom] = useState(null)
   const socket = useSocket();
   const navigate = useNavigate();
+  const dispatch = useDispatch()
 
   const formSubmitHandler = useCallback((e)=> {
     e.preventDefault()
@@ -24,7 +27,11 @@ function Home() {
 
   const handleJoinRoom = useCallback(
     (data) => {
-      const { room } = data;
+      const { room, email } = data;
+      dispatch(setDetails({
+        email
+      }))
+
       navigate(`/room/${room}`);
     },
     [navigate]

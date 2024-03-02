@@ -2,16 +2,22 @@ import React, { useEffect, useCallback, useState, useRef } from "react";
 import ReactPlayer from "react-player";
 import peer from "../service/peer";
 import { useSocket } from "../context/SocketProvider";
+import { useSelector } from "react-redux";
+import { AiOutlineAudio, AiOutlineAudioMuted } from "react-icons/ai";
 
 const RoomPage = () => {
   const socket = useSocket();
   const [remoteSocketId, setRemoteSocketId] = useState(null);
   const [myStream, setMyStream] = useState();
   const [remoteStream, setRemoteStream] = useState();
-  const [clientAudio, setClientAudio] = useState(true)
-  const [userAudio, setUserAudio] = useState(true)
 
-  const userAud = useRef(false)
+  const [clientAudio, setClientAudio] = useState(true);
+  const [userAudio, setUserAudio] = useState(true);
+
+  const [isUserVideo, setIsUserVideo] = useState(true);
+  const [isClientVideo, setIsClientVideo] = useState(true);
+
+  const state = useSelector((state) => state);
 
   const handleUserJoined = useCallback(({ email, id }) => {
     console.log(`Email ${email} joined room`);
@@ -23,6 +29,7 @@ const RoomPage = () => {
       audio: true,
       video: true,
     });
+
     const offer = await peer.getOffer();
     socket.emit("user:call", { to: remoteSocketId, offer });
     setMyStream(stream);
@@ -113,56 +120,120 @@ const RoomPage = () => {
     handleNegoNeedFinal,
   ]);
 
-  console.log(clientAudio, userAudio)
-
   return (
     <div className="bg-black text-white h-full">
       <h1 className="text-center text-7xl">Room Page</h1>
-      <h4 className="text-center mt-3">{remoteSocketId ? "Line has been connected successfully" : "No one in room"}</h4>
+      <h4 className="text-center mt-3">
+        {remoteSocketId
+          ? "Line has been connected successfully"
+          : "No one in room"}
+      </h4>
       <div className="flex justify-center mt-5 space-x-5">
-      {myStream && <button className="bg-red-600 px-5 py-1 rounded-sm hover:bg-white hover:text-black" onClick={sendStreams}>Send Stream</button>}
-      
-      {remoteSocketId && <button onClick={handleCallUser} className="bg-red-600 px-5 py-1 rounded-sm hover:bg-white hover:text-black">Connect Call</button>}
+        {myStream && (
+          <button
+            className="bg-red-600 px-5 py-1 rounded-sm hover:bg-white hover:text-black"
+            onClick={sendStreams}
+          >
+            Send Stream
+          </button>
+        )}
+
+        {remoteSocketId && (
+          <button
+            onClick={handleCallUser}
+            className="bg-red-600 px-5 py-1 rounded-sm hover:bg-white hover:text-black"
+          >
+            Connect Call
+          </button>
+        )}
       </div>
 
-      <div className="flex justify-between px-10">
-      <div>
-      {myStream && (
-        <>
-          <h1>My Stream</h1>
-          <ReactPlayer
-            style={{border:"1px solid green"}}
-            playing
-            height="500px"
-            width="500px"
-            url={myStream}
-            muted={userAudio}
-          />
-          <button onClick={()=> setUserAudio(!userAudio)}>{userAudio ? "Unmute" : "Mute"}</button>
-        </>
-      )}
+      <div className="sm:flex sm:justify-between px-10 ">
+        <div className="mb-5 sm:mb-0">
+          {myStream && (
+            <>
+              <h1>My Stream : {state.userDetails.email}</h1>
+              <ReactPlayer
+                style={{ border: "1px solid green" }}
+                playing
+                height="500px"
+                width="500px"
+                url={myStream}
+                muted={userAudio}
+              />
+              {/* <button onClick={()=> setUserAudio(!userAudio)}>{userAudio ? "Unmute" : "Mute"}</button> */}
+              <div className="flex space-x-3">
+                <div className="mt-3" onClick={() => setUserAudio(!userAudio)}>
+                  {userAudio ? (
+                    <AiOutlineAudioMuted
+                      size={30}
+                      color="black"
+                      className="bg-white rounded-full"
+                    />
+                  ) : (
+                    <AiOutlineAudio
+                      size={30}
+                      color="black"
+                      className="bg-white rounded-full"
+                    />
+                  )}
+                </div>
+
+                <div className="mt-3">
+                  <button>Stop Video</button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        <div>
+          {remoteStream && (
+            <>
+              <h1>Remote Stream : {state.userDetails.email}</h1>
+              <ReactPlayer
+                style={{ border: "1px solid green" }}
+                playing
+                height="500px"
+                width="500px"
+                url={remoteStream}
+                muted={clientAudio}
+              />
+              {/* <button onClick={()=> setClientAudio(!clientAudio)}>{clientAudio ? "Unmute" : "Mute"}</button> */}
+
+              {/* ## Options Section ## */}
+              <div className="flex space-x-5">
+                <div
+                  className="mt-3"
+                  onClick={() => setClientAudio(!clientAudio)}
+                >
+                  {clientAudio ? (
+                    <AiOutlineAudioMuted
+                      size={30}
+                      color="black"
+                      className="bg-white rounded-full"
+                    />
+                  ) : (
+                    <AiOutlineAudio
+                      size={30}
+                      color="black"
+                      className="bg-white rounded-full"
+                    />
+                  )}
+                </div>
+
+                <div className="mt-3">
+                  <button>Stop Video</button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
-      <div>
-      {remoteStream && (
-        <>
-          <h1>Remote Stream</h1>
-          {console.log('Inside here ')}
-          <ReactPlayer
-            style={{border:"1px solid green"}}
-            playing
-            height="500px"
-            width="500px"
-            url={remoteStream}
-            muted={clientAudio}
-          />
-          <button onClick={()=> setClientAudio(!clientAudio)}>{clientAudio ? "Unmute" : "Mute"}</button>
-        </>
-      )}
-      </div>
-      </div>
-
-      <h6 className="text-center text-red-700 text-2xl mt-5">Note: This is under development, build block by Ansh Viyogi</h6>
+      <h6 className="text-center text-red-700 text-2xl mt-5">
+        Note: This is under development, build block by Ansh Viyogi
+      </h6>
     </div>
   );
 };

@@ -5,15 +5,19 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { SocketProvider } from "./context/SocketProvider";
+import { Provider } from "react-redux";
+import { store } from "./app/store";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <SocketProvider>
-        <App />
-      </SocketProvider>
-    </BrowserRouter>
+    <Provider store={store}>
+      <BrowserRouter>
+        <SocketProvider>
+          <App />
+        </SocketProvider>
+      </BrowserRouter>
+    </Provider>
   </React.StrictMode>
 );
 

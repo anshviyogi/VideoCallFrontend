@@ -9,7 +9,8 @@ export const useSocket = () => {
 };
 
 export const SocketProvider = (props) => {
-  const socket = useMemo(() => io("https://stormy-overjoyed-locket.glitch.me/"), []);
+  // const socket = useMemo(() => io("https://stormy-overjoyed-locket.glitch.me/"), []);
+  const socket = useMemo(() => io("localhost:8000"), []);
 
   return (
     <SocketContext.Provider value={socket}>
