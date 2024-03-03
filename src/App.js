@@ -1,17 +1,19 @@
 import { Routes, Route } from "react-router-dom";
-import "./App.css";
 import LobbyScreen from "./screens/Lobby";
 import RoomPage from "./screens/Room";
 import Home from "./screens/Home";
+import Chat from "./screens/Chat";
 
 function App() {
   return (
-    <div className="">
+    <div>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/chat" element={<Chat />} />
+        <Route path="/room/:roomId" element={<RoomPage />} />
 
         {/* <Route path="/" element={<LobbyScreen />} /> */}
-        <Route path="/room/:roomId" element={<RoomPage />} />
+
       </Routes>
     </div>
   );

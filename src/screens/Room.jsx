@@ -3,7 +3,11 @@ import ReactPlayer from "react-player";
 import peer from "../service/peer";
 import { useSocket } from "../context/SocketProvider";
 import { useSelector } from "react-redux";
-import { AiOutlineAudio, AiOutlineAudioMuted } from "react-icons/ai";
+import {
+  AiOutlineAudio,
+  AiOutlineAudioMuted,
+  AiOutlineSend,
+} from "react-icons/ai";
 
 const RoomPage = () => {
   const socket = useSocket();
@@ -17,10 +21,12 @@ const RoomPage = () => {
   const [isClientVideoVisible, setIsClientVideoVisible] = useState(true);
   const [userVideoVisible, setUserVideoVisible] = useState(true);
 
+  const [chat, setChat] = useState(null);
+  const [messages, setMessages] = useState([]);
+
   const state = useSelector((state) => state);
 
   const handleUserJoined = useCallback(({ email, id }) => {
-    console.log(`Email ${email} joined room`);
     setRemoteSocketId(id);
   }, []);
 
@@ -43,7 +49,6 @@ const RoomPage = () => {
         video: true,
       });
       setMyStream(stream);
-      console.log(`Incoming Call`, from, offer);
       const ans = await peer.getAnswer(offer);
       socket.emit("call:accepted", { to: from, ans });
     },
@@ -59,7 +64,6 @@ const RoomPage = () => {
   const handleCallAccepted = useCallback(
     ({ from, ans }) => {
       peer.setLocalDescription(ans);
-      console.log("Call Accepted!");
       sendStreams();
     },
     [sendStreams]
@@ -96,6 +100,28 @@ const RoomPage = () => {
       setRemoteStream(remoteStream[0]);
     });
   }, []);
+
+  const sendChat = useCallback((e) => {
+    e.preventDefault();
+    socket.emit("chat:incoming", { chat });
+  }, [chat]);
+
+  const chatFromServer = useCallback((data) => {
+    setChat("")
+
+    setMessages((prevMessages) => {
+      return [...prevMessages, data.chat]
+    });
+  }, []);
+
+  
+  useEffect(() => {
+    socket.on("server:outgoing", chatFromServer);
+
+    return () => {
+      socket.off("server:outgoing", chatFromServer);
+    };
+  }, [socket, chatFromServer]);
 
   useEffect(() => {
     socket.on("user:joined", handleUserJoined);
@@ -264,6 +290,37 @@ const RoomPage = () => {
             </>
           )}
         </div>
+
+        {myStream && remoteStream && (
+          <form
+            className="bg-white h-[500px] text-black w-[300px] mt-6"
+            onSubmit={sendChat}
+          >
+            <h1 className="text-3xl text-center">Chat Box</h1>
+            <div className="border border-gray-400"></div>
+            {/* Messages */}
+            <div>
+              {messages?.map(item => (
+                <h3>{item}</h3>
+              ))}
+            </div>
+
+            {/* Message Input */}
+            <div className="absolute bottom-7 flex">
+              <input
+                type="text"
+                spellCheck={false}
+                placeholder="Messages"
+                className=" ml-3 border border-gray-400 focus:border-gray-600 outline-none px-5 py-2 rounded-md"
+                value={chat}
+                onChange={(e) => setChat(e.target.value)}
+              />
+              <button>
+                <AiOutlineSend size={30} className="cursor-pointer mt-1 ml-3" />
+              </button>
+            </div>
+          </form>
+        )}
       </div>
 
       <h6 className="text-center text-red-700 text-2xl mt-5">
