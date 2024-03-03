@@ -60,7 +60,7 @@ function Home() {
 
         <div className="flex space-x-10">
           <h3 className="mt-2 text-l">{`${hours}:${minutes}`}PM</h3>
-          <div className="w-10 h-10 bg-gray-400 rounded-full flex justify-center align-middle">
+          <div className="w-10 h-10 bg-gray-400 rounded-full grid place-items-center">
             <span className="flex justify-center align-middle">A</span>
           </div>
         </div>

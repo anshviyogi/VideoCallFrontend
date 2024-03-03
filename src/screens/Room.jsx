@@ -14,8 +14,8 @@ const RoomPage = () => {
   const [clientAudio, setClientAudio] = useState(true);
   const [userAudio, setUserAudio] = useState(true);
 
-  const [isUserVideo, setIsUserVideo] = useState(true);
-  const [isClientVideo, setIsClientVideo] = useState(true);
+  const [isClientVideoVisible, setIsClientVideoVisible] = useState(true);
+  const [userVideoVisible, setUserVideoVisible] = useState(true);
 
   const state = useSelector((state) => state);
 
@@ -92,7 +92,7 @@ const RoomPage = () => {
   useEffect(() => {
     peer.peer.addEventListener("track", async (ev) => {
       const remoteStream = ev.streams;
-      console.log("GOT TRACKS!!");
+
       setRemoteStream(remoteStream[0]);
     });
   }, []);
@@ -154,15 +154,28 @@ const RoomPage = () => {
             <>
               <h1>My Stream : {state.userDetails.email}</h1>
               <ReactPlayer
-                style={{ border: "1px solid green" }}
+                style={{
+                  border: "1px solid green",
+                  display: `${userVideoVisible ? "" : "none"}`,
+                }}
                 playing
                 height="500px"
                 width="500px"
                 url={myStream}
                 muted={userAudio}
               />
+
+              {!userVideoVisible && (
+                <div className="w-[500px] h-[500px] bg-blue-400 grid place-items-center">
+                  <h3 className="bg-red-500 w-[70px] h-[70px] rounded-full grid place-items-center text-2xl capitalize">
+                    {state.userDetails.email.split("")[0]}
+                  </h3>
+                </div>
+              )}
+
               {/* <button onClick={()=> setUserAudio(!userAudio)}>{userAudio ? "Unmute" : "Mute"}</button> */}
               <div className="flex space-x-3">
+                {/* @Audio Controls */}
                 <div className="mt-3" onClick={() => setUserAudio(!userAudio)}>
                   {userAudio ? (
                     <AiOutlineAudioMuted
@@ -179,8 +192,13 @@ const RoomPage = () => {
                   )}
                 </div>
 
+                {/* @Video Controls */}
                 <div className="mt-3">
-                  <button>Stop Video</button>
+                  <button
+                    onClick={() => setUserVideoVisible(!userVideoVisible)}
+                  >
+                    {userVideoVisible ? "Stop Video" : "Show Video"}
+                  </button>
                 </div>
               </div>
             </>
@@ -192,13 +210,24 @@ const RoomPage = () => {
             <>
               <h1>Remote Stream : {state.userDetails.email}</h1>
               <ReactPlayer
-                style={{ border: "1px solid green" }}
+                style={{
+                  border: "1px solid green",
+                  display: `${isClientVideoVisible ? "" : "none"}`,
+                }}
                 playing
                 height="500px"
                 width="500px"
                 url={remoteStream}
                 muted={clientAudio}
               />
+
+              {!isClientVideoVisible && (
+                <div className="w-[500px] h-[500px] bg-blue-400 grid place-items-center">
+                  <h3 className="bg-red-500 w-[70px] h-[70px] rounded-full grid place-items-center text-2xl capitalize">
+                    {state.userDetails.email.split("")[0]}
+                  </h3>
+                </div>
+              )}
               {/* <button onClick={()=> setClientAudio(!clientAudio)}>{clientAudio ? "Unmute" : "Mute"}</button> */}
 
               {/* ## Options Section ## */}
@@ -223,7 +252,13 @@ const RoomPage = () => {
                 </div>
 
                 <div className="mt-3">
-                  <button>Stop Video</button>
+                  <button
+                    onClick={() =>
+                      setIsClientVideoVisible(!isClientVideoVisible)
+                    }
+                  >
+                    {isClientVideoVisible ? "Stop Video" : "Show Video"}
+                  </button>
                 </div>
               </div>
             </>
